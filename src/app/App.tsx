@@ -1,59 +1,85 @@
 import { useState } from 'react';
-import { Sidebar } from './components/Sidebar';
-import { ProcessingPanel } from './components/ProcessingPanel';
-import { HistoryView } from './components/HistoryView';
-import { ArtifactViewer } from './components/ArtifactViewer';
-import { SearchView } from './components/SearchView';
-import { SettingsView } from './components/SettingsView';
-
-type ViewType = 'processing' | 'history' | 'artifacts' | 'search' | 'settings';
+import { LeftPanel } from './components/LeftPanel';
+import { RightPanel } from './components/RightPanel';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<ViewType>('processing');
   const [selectedMeeting, setSelectedMeeting] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [logs, setLogs] = useState<string[]>([
+    '[10:15:32] Application started',
+    '[10:15:32] Ready to process files',
+  ]);
+
+  const addLog = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setLogs(prev => [...prev, `[${timestamp}] ${message}`]);
+  };
+
+  const handleStartProcessing = (files: any[]) => {
+    setIsProcessing(true);
+    addLog(`Starting batch processing for ${files.length} file(s)...`);
+    
+    // Simulate processing
+    setTimeout(() => {
+      addLog('✅ Audio ready (cache hit)');
+    }, 1000);
+    
+    setTimeout(() => {
+      addLog('✅ Transcript: 2.3k words, ru');
+    }, 2500);
+    
+    setTimeout(() => {
+      addLog('✅ Summary ready (DeepSeek)');
+    }, 4000);
+    
+    setTimeout(() => {
+      addLog('✅ EDIT complete (TF-IDF)');
+      setIsProcessing(false);
+      setSelectedMeeting('2026-01-13_10-15-00_meeting');
+    }, 5500);
+  };
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
-      <Sidebar currentView={currentView} onViewChange={setCurrentView} />
-      
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="font-semibold text-gray-900">AI Meeting Manager</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
-              {currentView === 'processing' && 'Process new meetings'}
-              {currentView === 'history' && 'Meeting history'}
-              {currentView === 'artifacts' && 'View artifacts'}
-              {currentView === 'search' && 'Search meetings'}
-              {currentView === 'settings' && 'Settings & plugins'}
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500">v1.0.0</span>
-          </div>
-        </header>
+    <div className="h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#1E293B]">
+      {/* Menu Bar */}
+      <div className="h-10 bg-white dark:bg-[#334155] border-b border-gray-200 dark:border-gray-700 flex items-center px-4 gap-6">
+        <div className="font-semibold text-gray-900 dark:text-gray-100">AI Meeting Notes</div>
+        <div className="flex gap-4 text-sm text-gray-600 dark:text-gray-300">
+          <button className="hover:text-gray-900 dark:hover:text-white">File</button>
+          <button className="hover:text-gray-900 dark:hover:text-white">Edit</button>
+          <button className="hover:text-gray-900 dark:hover:text-white">View</button>
+          <button className="hover:text-gray-900 dark:hover:text-white">Settings</button>
+          <button className="hover:text-gray-900 dark:hover:text-white">Help</button>
+        </div>
+      </div>
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-hidden">
-          {currentView === 'processing' && (
-            <ProcessingPanel onMeetingCreated={(id) => {
-              setSelectedMeeting(id);
-              setCurrentView('artifacts');
-            }} />
-          )}
-          {currentView === 'history' && (
-            <HistoryView onSelectMeeting={(id) => {
-              setSelectedMeeting(id);
-              setCurrentView('artifacts');
-            }} />
-          )}
-          {currentView === 'artifacts' && (
-            <ArtifactViewer meetingId={selectedMeeting} />
-          )}
-          {currentView === 'search' && <SearchView />}
-          {currentView === 'settings' && <SettingsView />}
-        </main>
+      {/* Main Content Area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left Panel (35%) */}
+        <div className="w-[35%] border-r border-gray-200 dark:border-gray-700">
+          <LeftPanel 
+            isProcessing={isProcessing}
+            onStartProcessing={handleStartProcessing}
+            logs={logs}
+          />
+        </div>
+
+        {/* Right Panel (65%) */}
+        <div className="w-[65%]">
+          <RightPanel 
+            selectedMeeting={selectedMeeting}
+            onSelectMeeting={setSelectedMeeting}
+          />
+        </div>
+      </div>
+
+      {/* Status Bar */}
+      <div className="h-8 bg-white dark:bg-[#334155] border-t border-gray-200 dark:border-gray-700 flex items-center px-4 text-sm text-gray-600 dark:text-gray-300">
+        {isProcessing ? (
+          <span>⏳ Processing test2.webm | 2/5 files</span>
+        ) : (
+          <span>Ready</span>
+        )}
       </div>
     </div>
   );
