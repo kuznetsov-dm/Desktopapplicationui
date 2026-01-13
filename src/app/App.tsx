@@ -1,84 +1,65 @@
-import { useState } from 'react';
-import { LeftPanel } from './components/LeftPanel';
-import { RightPanel } from './components/RightPanel';
+import { useState, useEffect } from 'react';
+import { Sidebar } from './components/Sidebar';
+import { MeetingWorkspace } from './components/MeetingWorkspace';
+import { CommandPalette } from './components/CommandPalette';
+import { QuickActions } from './components/QuickActions';
 
 export default function App() {
-  const [selectedMeeting, setSelectedMeeting] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [logs, setLogs] = useState<string[]>([
-    '[10:15:32] Application started',
-    '[10:15:32] Ready to process files',
-  ]);
+  const [selectedMeeting, setSelectedMeeting] = useState<string | null>('2026-01-13_10-15-00_meeting');
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
-  const addLog = (message: string) => {
-    const timestamp = new Date().toLocaleTimeString();
-    setLogs(prev => [...prev, `[${timestamp}] ${message}`]);
-  };
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowCommandPalette(true);
+      }
+      if (e.key === 'Escape') {
+        setShowCommandPalette(false);
+      }
+    };
 
-  const handleStartProcessing = (files: any[]) => {
-    setIsProcessing(true);
-    addLog(`Starting batch processing for ${files.length} file(s)...`);
-    
-    // Simulate processing
-    setTimeout(() => {
-      addLog('✅ Audio ready (cache hit)');
-    }, 1000);
-    
-    setTimeout(() => {
-      addLog('✅ Transcript: 2.3k words, ru');
-    }, 2500);
-    
-    setTimeout(() => {
-      addLog('✅ Summary ready (DeepSeek)');
-    }, 4000);
-    
-    setTimeout(() => {
-      addLog('✅ EDIT complete (TF-IDF)');
-      setIsProcessing(false);
-      setSelectedMeeting('2026-01-13_10-15-00_meeting');
-    }, 5500);
-  };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
-    <div className="h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#1E293B]">
-      {/* Menu Bar */}
-      <div className="h-10 bg-white dark:bg-[#334155] border-b border-gray-200 dark:border-gray-700 flex items-center px-4 gap-6">
-        <div className="font-semibold text-gray-900 dark:text-gray-100">AI Meeting Notes</div>
-        <div className="flex gap-4 text-sm text-gray-600 dark:text-gray-300">
-          <button className="hover:text-gray-900 dark:hover:text-white">File</button>
-          <button className="hover:text-gray-900 dark:hover:text-white">Edit</button>
-          <button className="hover:text-gray-900 dark:hover:text-white">View</button>
-          <button className="hover:text-gray-900 dark:hover:text-white">Settings</button>
-          <button className="hover:text-gray-900 dark:hover:text-white">Help</button>
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel (35%) */}
-        <div className="w-[35%] border-r border-gray-200 dark:border-gray-700">
-          <LeftPanel 
-            isProcessing={isProcessing}
-            onStartProcessing={handleStartProcessing}
-            logs={logs}
-          />
+    <div className={`h-screen overflow-hidden ${theme === 'dark' ? 'dark' : ''}`}>
+      <div className="h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 dark:from-black dark:via-gray-950 dark:to-black text-white">
+        {/* Animated Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 blur-3xl animate-pulse" />
+          <div className="absolute -bottom-1/2 -right-1/2 w-full h-full bg-gradient-to-tl from-cyan-500/10 via-blue-500/10 to-purple-500/10 blur-3xl animate-pulse delay-1000" />
         </div>
 
-        {/* Right Panel (65%) */}
-        <div className="w-[65%]">
-          <RightPanel 
+        <div className="relative h-full flex">
+          {/* Sidebar */}
+          <Sidebar 
             selectedMeeting={selectedMeeting}
             onSelectMeeting={setSelectedMeeting}
+            theme={theme}
+            onThemeToggle={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
           />
-        </div>
-      </div>
 
-      {/* Status Bar */}
-      <div className="h-8 bg-white dark:bg-[#334155] border-t border-gray-200 dark:border-gray-700 flex items-center px-4 text-sm text-gray-600 dark:text-gray-300">
-        {isProcessing ? (
-          <span>⏳ Processing test2.webm | 2/5 files</span>
-        ) : (
-          <span>Ready</span>
+          {/* Main Workspace */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <MeetingWorkspace 
+              meetingId={selectedMeeting}
+              onOpenCommandPalette={() => setShowCommandPalette(true)}
+            />
+          </div>
+
+          {/* Quick Actions Floating Panel */}
+          <QuickActions meetingId={selectedMeeting} />
+        </div>
+
+        {/* Command Palette */}
+        {showCommandPalette && (
+          <CommandPalette 
+            onClose={() => setShowCommandPalette(false)}
+            onSelectMeeting={setSelectedMeeting}
+          />
         )}
       </div>
     </div>
