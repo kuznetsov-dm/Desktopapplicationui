@@ -1,11 +1,9 @@
 import { useState } from 'react';
-import { Search, Plus, Star, Clock, Tag, Sparkles, Sun, Moon, Filter } from 'lucide-react';
+import { Search, Database, Activity, Zap } from 'lucide-react';
 
 interface SidebarProps {
   selectedMeeting: string | null;
   onSelectMeeting: (id: string) => void;
-  theme: 'dark' | 'light';
-  onThemeToggle: () => void;
 }
 
 interface Meeting {
@@ -13,187 +11,177 @@ interface Meeting {
   title: string;
   date: string;
   duration: string;
-  participants: number;
-  tags: string[];
-  starred: boolean;
-  hasAI: boolean;
-  thumbnail?: string;
+  status: 'active' | 'processed' | 'archived';
+  aiScore: number;
 }
 
-export function Sidebar({ selectedMeeting, onSelectMeeting, theme, onThemeToggle }: SidebarProps) {
+export function Sidebar({ selectedMeeting, onSelectMeeting }: SidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [filter, setFilter] = useState<'all' | 'starred' | 'recent'>('all');
 
   const meetings: Meeting[] = [
     {
       id: '2026-01-13_10-15-00_meeting',
-      title: 'Product Strategy Q1 2026',
-      date: 'Today, 10:15',
-      duration: '1h 24m',
-      participants: 8,
-      tags: ['strategy', 'product'],
-      starred: true,
-      hasAI: true,
+      title: 'PRODUCT_STRATEGY_Q1_2026',
+      date: '2026.01.13',
+      duration: '84:32',
+      status: 'processed',
+      aiScore: 94,
     },
     {
       id: '2026-01-12_14-30-00_team-sync',
-      title: 'Engineering Team Sync',
-      date: 'Yesterday, 14:30',
-      duration: '45m',
-      participants: 12,
-      tags: ['engineering', 'weekly'],
-      starred: false,
-      hasAI: true,
+      title: 'ENGINEERING_TEAM_SYNC',
+      date: '2026.01.12',
+      duration: '45:18',
+      status: 'processed',
+      aiScore: 87,
     },
     {
       id: '2026-01-11_09-00-00_standup',
-      title: 'Daily Standup',
-      date: 'Jan 11, 09:00',
-      duration: '15m',
-      participants: 6,
-      tags: ['daily'],
-      starred: false,
-      hasAI: true,
-    },
-    {
-      id: '2026-01-10_16-00-00_design',
-      title: 'Design Review Session',
-      date: 'Jan 10, 16:00',
-      duration: '2h 10m',
-      participants: 5,
-      tags: ['design', 'review'],
-      starred: true,
-      hasAI: true,
+      title: 'DAILY_STANDUP_SESSION',
+      date: '2026.01.11',
+      duration: '15:22',
+      status: 'archived',
+      aiScore: 76,
     },
   ];
 
-  const filteredMeetings = meetings.filter(m => {
-    if (filter === 'starred' && !m.starred) return false;
-    if (searchQuery && !m.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
-    return true;
-  });
+  const filteredMeetings = meetings.filter(m =>
+    m.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active': return 'text-cyan-400';
+      case 'processed': return 'text-green-400';
+      case 'archived': return 'text-amber-400';
+      default: return 'text-gray-400';
+    }
+  };
 
   return (
-    <div className="w-80 border-r border-white/10 backdrop-blur-xl bg-white/5 flex flex-col">
+    <div className="w-80 border-r border-cyan-500/30 bg-black/80 backdrop-blur-xl flex flex-col">
       {/* Header */}
-      <div className="p-6 border-b border-white/10">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-              <Sparkles className="size-5 text-white" />
-            </div>
-            <div>
-              <div className="font-bold text-white">AI Meetings</div>
-              <div className="text-xs text-gray-400">Ultra Edition</div>
-            </div>
+      <div className="p-4 border-b border-cyan-500/30">
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Database className="size-5 text-cyan-400" />
+            <span className="text-cyan-400 font-mono text-sm font-bold tracking-wider">
+              DATABASE
+            </span>
           </div>
-          <button
-            onClick={onThemeToggle}
-            className="p-2 hover:bg-white/10 rounded-lg transition-all duration-200"
-          >
-            {theme === 'dark' ? <Sun className="size-4 text-gray-400" /> : <Moon className="size-4 text-gray-400" />}
-          </button>
+          <div className="text-cyan-400/60 font-mono text-xs">
+            MEETING RECORDS
+          </div>
         </div>
 
         {/* Search */}
-        <div className="relative group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400 group-hover:text-blue-400 transition-colors" />
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-cyan-400/60" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search meetings... (⌘K)"
-            className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+            placeholder="SEARCH..."
+            className="w-full pl-10 pr-4 py-2 bg-cyan-950/30 border border-cyan-500/30 rounded text-cyan-400 placeholder-cyan-400/40 focus:outline-none focus:border-cyan-400 font-mono text-sm"
           />
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="px-6 py-4 border-b border-white/10">
-        <div className="flex gap-2">
-          {[
-            { id: 'all', label: 'All', icon: Clock },
-            { id: 'starred', label: 'Starred', icon: Star },
-            { id: 'recent', label: 'Recent', icon: Filter },
-          ].map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setFilter(id as any)}
-              className={`flex-1 px-3 py-2 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all duration-200 ${
-                filter === id
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/25'
-                  : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              <Icon className="size-3.5" />
-              {label}
-            </button>
-          ))}
+      {/* Stats */}
+      <div className="p-4 border-b border-cyan-500/30 grid grid-cols-3 gap-2">
+        <div className="bg-cyan-950/30 border border-cyan-500/30 rounded p-2">
+          <div className="text-cyan-400/60 font-mono text-[10px] mb-1">TOTAL</div>
+          <div className="text-cyan-400 font-mono text-xl font-bold">{meetings.length}</div>
+        </div>
+        <div className="bg-cyan-950/30 border border-cyan-500/30 rounded p-2">
+          <div className="text-green-400/60 font-mono text-[10px] mb-1">ACTIVE</div>
+          <div className="text-green-400 font-mono text-xl font-bold">
+            {meetings.filter(m => m.status === 'processed').length}
+          </div>
+        </div>
+        <div className="bg-cyan-950/30 border border-cyan-500/30 rounded p-2">
+          <div className="text-amber-400/60 font-mono text-[10px] mb-1">ARCHIVE</div>
+          <div className="text-amber-400 font-mono text-xl font-bold">
+            {meetings.filter(m => m.status === 'archived').length}
+          </div>
         </div>
       </div>
 
       {/* Meetings List */}
-      <div className="flex-1 overflow-auto px-4 py-4 space-y-2">
+      <div className="flex-1 overflow-auto p-2 space-y-2">
         {filteredMeetings.map((meeting) => (
           <div
             key={meeting.id}
             onClick={() => onSelectMeeting(meeting.id)}
-            className={`group relative p-4 rounded-xl cursor-pointer transition-all duration-300 ${
+            className={`group relative cursor-pointer transition-all ${
               selectedMeeting === meeting.id
-                ? 'bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30 shadow-lg shadow-blue-500/10'
-                : 'bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/20'
-            }`}
+                ? 'bg-cyan-500/20 border-cyan-400 shadow-lg shadow-cyan-500/20'
+                : 'bg-cyan-950/20 border-cyan-500/30 hover:border-cyan-400/50'
+            } border rounded p-3`}
           >
-            {/* Gradient Overlay on Hover */}
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500/0 to-purple-500/0 group-hover:from-blue-500/5 group-hover:to-purple-500/5 transition-all duration-300" />
+            {/* OLED Display Effect */}
+            <div className="absolute inset-0 bg-black/60 rounded" />
+            <div className="absolute inset-0 opacity-30" style={{
+              backgroundImage: 'linear-gradient(0deg, transparent 50%, rgba(0, 255, 255, 0.1) 50%)',
+              backgroundSize: '100% 2px'
+            }} />
             
             <div className="relative">
               <div className="flex items-start justify-between mb-2">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-semibold text-white truncate">{meeting.title}</h3>
-                    {meeting.hasAI && (
-                      <div className="flex-shrink-0 w-5 h-5 rounded-md bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                        <Sparkles className="size-3 text-white" />
-                      </div>
-                    )}
+                  <div className="font-mono text-xs text-cyan-400 mb-1 truncate">
+                    {meeting.title}
                   </div>
-                  <div className="text-xs text-gray-400 flex items-center gap-2">
-                    <span>{meeting.date}</span>
-                    <span>•</span>
-                    <span>{meeting.duration}</span>
-                    <span>•</span>
-                    <span>{meeting.participants} people</span>
+                  <div className="flex items-center gap-2 text-[10px] font-mono">
+                    <span className="text-cyan-400/60">{meeting.date}</span>
+                    <span className="text-cyan-400/40">|</span>
+                    <span className="text-cyan-400/60">{meeting.duration}</span>
                   </div>
                 </div>
-                {meeting.starred && (
-                  <Star className="size-4 text-yellow-400 fill-yellow-400 flex-shrink-0" />
-                )}
+                <div className="flex-shrink-0 ml-2">
+                  <div className={`w-2 h-2 rounded-full ${
+                    meeting.status === 'processed' ? 'bg-green-400' :
+                    meeting.status === 'active' ? 'bg-cyan-400' :
+                    'bg-amber-400'
+                  } animate-pulse`} />
+                </div>
               </div>
 
-              {/* Tags */}
-              <div className="flex flex-wrap gap-1.5">
-                {meeting.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/10 text-xs text-gray-300"
-                  >
-                    <Tag className="size-2.5" />
-                    {tag}
-                  </span>
-                ))}
+              {/* AI Score Bar */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-[10px] font-mono">
+                  <span className="text-cyan-400/60">AI SCORE</span>
+                  <span className="text-cyan-400">{meeting.aiScore}%</span>
+                </div>
+                <div className="h-1 bg-cyan-950/50 rounded-full overflow-hidden border border-cyan-500/30">
+                  <div
+                    className="h-full bg-gradient-to-r from-cyan-400 to-green-400 shadow-lg shadow-cyan-500/50"
+                    style={{ width: `${meeting.aiScore}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Status */}
+              <div className="mt-2 flex items-center gap-1">
+                <Activity className="size-3 text-cyan-400/60" />
+                <span className={`font-mono text-[10px] ${getStatusColor(meeting.status)}`}>
+                  {meeting.status.toUpperCase()}
+                </span>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* New Meeting Button */}
-      <div className="p-4 border-t border-white/10">
-        <button className="w-full px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-xl font-medium text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-200 flex items-center justify-center gap-2 group">
-          <Plus className="size-5 group-hover:rotate-90 transition-transform duration-200" />
-          New Meeting
+      {/* Bottom Panel */}
+      <div className="p-4 border-t border-cyan-500/30 space-y-2">
+        <button className="w-full py-2 bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400 text-black font-mono text-sm font-bold tracking-wider rounded transition-all shadow-lg shadow-cyan-500/50">
+          + NEW RECORD
         </button>
+        <div className="flex items-center justify-center gap-2 text-cyan-400/60 font-mono text-xs">
+          <Zap className="size-3" />
+          <span>PRESS ⌘K FOR COMMANDS</span>
+        </div>
       </div>
     </div>
   );

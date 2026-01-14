@@ -1,24 +1,14 @@
 import { useState } from 'react';
 import { 
-  FileText, 
-  Sparkles, 
-  Download, 
-  Share2, 
-  Copy, 
-  Search,
-  Bookmark,
-  MessageSquare,
-  MoreVertical,
-  Zap,
-  Clock,
-  Users,
-  ChevronRight,
-  Play,
-  Pause
+  Terminal, 
+  Activity,
+  Cpu,
+  Database,
+  Zap
 } from 'lucide-react';
-import { ArtifactViewer } from './ArtifactViewer';
-import { AIInsights } from './AIInsights';
-import { Timeline } from './Timeline';
+import { OLEDTerminal } from './OLEDTerminal';
+import { AIMetrics } from './AIMetrics';
+import { ArtifactTabs } from './ArtifactTabs';
 
 interface MeetingWorkspaceProps {
   meetingId: string | null;
@@ -26,18 +16,15 @@ interface MeetingWorkspaceProps {
 }
 
 export function MeetingWorkspace({ meetingId, onOpenCommandPalette }: MeetingWorkspaceProps) {
-  const [activeView, setActiveView] = useState<'artifacts' | 'insights' | 'timeline'>('artifacts');
-  const [showSearch, setShowSearch] = useState(false);
+  const [activePanel, setActivePanel] = useState<'terminal' | 'artifacts'>('artifacts');
 
   if (!meetingId) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-center">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center mx-auto mb-4">
-            <FileText className="size-10 text-gray-400" />
-          </div>
-          <p className="text-gray-400 text-lg mb-2">No meeting selected</p>
-          <p className="text-gray-500 text-sm">Select a meeting from the sidebar or create a new one</p>
+          <Terminal className="size-16 text-cyan-400/30 mx-auto mb-4" />
+          <p className="text-cyan-400/60 font-mono text-sm">NO MEETING LOADED</p>
+          <p className="text-cyan-400/40 font-mono text-xs mt-2">SELECT FROM DATABASE</p>
         </div>
       </div>
     );
@@ -45,126 +32,99 @@ export function MeetingWorkspace({ meetingId, onOpenCommandPalette }: MeetingWor
 
   return (
     <div className="h-full flex flex-col">
-      {/* Enhanced Header */}
-      <div className="border-b border-white/10 bg-white/5 backdrop-blur-xl">
-        <div className="px-8 py-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
+      {/* Meeting Header */}
+      <div className="border-b border-cyan-500/30 bg-cyan-950/20">
+        <div className="px-6 py-4">
+          <div className="flex items-start justify-between mb-3">
+            <div>
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl font-bold text-white">Product Strategy Q1 2026</h1>
-                <div className="px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-medium flex items-center gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                  Processed
+                <div className="text-cyan-400 font-mono text-lg font-bold tracking-wider">
+                  PRODUCT_STRATEGY_Q1_2026
+                </div>
+                <div className="px-2 py-1 bg-green-500/20 border border-green-400/50 rounded text-green-400 font-mono text-xs">
+                  PROCESSED
                 </div>
               </div>
-              <div className="flex items-center gap-4 text-sm text-gray-400">
-                <span className="flex items-center gap-1.5">
-                  <Clock className="size-4" />
-                  Today at 10:15 AM
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Users className="size-4" />
-                  8 participants
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Play className="size-4" />
-                  1h 24m
-                </span>
+              <div className="flex items-center gap-4 font-mono text-xs text-cyan-400/60">
+                <span>2026.01.13 10:15:00</span>
+                <span>|</span>
+                <span>84:32 DURATION</span>
+                <span>|</span>
+                <span>8 PARTICIPANTS</span>
               </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => setShowSearch(!showSearch)}
-                className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-200 group"
-                title="Search in meeting (⌘F)"
-              >
-                <Search className="size-4 text-gray-400 group-hover:text-white" />
-              </button>
-              <button className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-200 group">
-                <Bookmark className="size-4 text-gray-400 group-hover:text-yellow-400" />
-              </button>
-              <button className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-200 group">
-                <MessageSquare className="size-4 text-gray-400 group-hover:text-blue-400" />
-              </button>
-              <button className="px-4 py-2.5 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium text-gray-300 hover:text-white">
-                <Share2 className="size-4" />
-                Share
-              </button>
-              <button className="px-4 py-2.5 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-lg transition-all duration-200 flex items-center gap-2 text-sm font-medium text-white shadow-lg shadow-blue-500/25">
-                <Download className="size-4" />
-                Export
-              </button>
-              <button className="p-2.5 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-200 group">
-                <MoreVertical className="size-4 text-gray-400 group-hover:text-white" />
-              </button>
             </div>
           </div>
 
-          {/* Quick Stats */}
-          <div className="flex items-center gap-4">
-            <div className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 flex items-center gap-2">
-              <Zap className="size-4 text-yellow-400" />
-              <span className="text-sm text-gray-300">14 AI Insights</span>
+          {/* Metrics Grid */}
+          <div className="grid grid-cols-4 gap-3">
+            <div className="bg-black/60 border border-cyan-500/30 rounded p-2">
+              <div className="flex items-center gap-2 mb-1">
+                <Zap className="size-3 text-cyan-400" />
+                <span className="text-cyan-400/60 font-mono text-[10px]">AI INSIGHTS</span>
+              </div>
+              <div className="text-cyan-400 font-mono text-xl font-bold">14</div>
             </div>
-            <div className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 flex items-center gap-2">
-              <FileText className="size-4 text-blue-400" />
-              <span className="text-sm text-gray-300">3,847 words</span>
+            <div className="bg-black/60 border border-cyan-500/30 rounded p-2">
+              <div className="flex items-center gap-2 mb-1">
+                <Database className="size-3 text-cyan-400" />
+                <span className="text-cyan-400/60 font-mono text-[10px]">WORD COUNT</span>
+              </div>
+              <div className="text-cyan-400 font-mono text-xl font-bold">3.8K</div>
             </div>
-            <div className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 flex items-center gap-2">
-              <MessageSquare className="size-4 text-purple-400" />
-              <span className="text-sm text-gray-300">23 action items</span>
+            <div className="bg-black/60 border border-cyan-500/30 rounded p-2">
+              <div className="flex items-center gap-2 mb-1">
+                <Activity className="size-3 text-cyan-400" />
+                <span className="text-cyan-400/60 font-mono text-[10px]">ACTIONS</span>
+              </div>
+              <div className="text-cyan-400 font-mono text-xl font-bold">23</div>
+            </div>
+            <div className="bg-black/60 border border-cyan-500/30 rounded p-2">
+              <div className="flex items-center gap-2 mb-1">
+                <Cpu className="size-3 text-cyan-400" />
+                <span className="text-cyan-400/60 font-mono text-[10px]">AI SCORE</span>
+              </div>
+              <div className="text-green-400 font-mono text-xl font-bold">94%</div>
             </div>
           </div>
         </div>
 
-        {/* View Tabs */}
-        <div className="px-8 flex gap-1">
-          {[
-            { id: 'artifacts', label: 'Artifacts', icon: FileText },
-            { id: 'insights', label: 'AI Insights', icon: Sparkles },
-            { id: 'timeline', label: 'Timeline', icon: Clock },
-          ].map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActiveView(id as any)}
-              className={`px-4 py-3 rounded-t-lg font-medium text-sm flex items-center gap-2 transition-all duration-200 relative ${
-                activeView === id
-                  ? 'text-white bg-white/10'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <Icon className="size-4" />
-              {label}
-              {activeView === id && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-600" />
-              )}
-            </button>
-          ))}
+        {/* Panel Tabs */}
+        <div className="flex border-t border-cyan-500/30">
+          <button
+            onClick={() => setActivePanel('artifacts')}
+            className={`px-6 py-2 font-mono text-xs font-bold tracking-wider transition-all relative ${
+              activePanel === 'artifacts'
+                ? 'text-cyan-400 bg-cyan-500/20'
+                : 'text-cyan-400/60 hover:text-cyan-400 hover:bg-cyan-500/10'
+            }`}
+          >
+            [ARTIFACTS]
+            {activePanel === 'artifacts' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-400 shadow-lg shadow-cyan-400/50" />
+            )}
+          </button>
+          <button
+            onClick={() => setActivePanel('terminal')}
+            className={`px-6 py-2 font-mono text-xs font-bold tracking-wider transition-all relative ${
+              activePanel === 'terminal'
+                ? 'text-cyan-400 bg-cyan-500/20'
+                : 'text-cyan-400/60 hover:text-cyan-400 hover:bg-cyan-500/10'
+            }`}
+          >
+            [TERMINAL OUTPUT]
+            {activePanel === 'terminal' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-cyan-400 shadow-lg shadow-cyan-400/50" />
+            )}
+          </button>
         </div>
       </div>
 
-      {/* Search Bar */}
-      {showSearch && (
-        <div className="px-8 py-4 bg-white/5 border-b border-white/10 backdrop-blur-xl">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search in this meeting..."
-              autoFocus
-              className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
-            />
-          </div>
-        </div>
-      )}
-
       {/* Content Area */}
-      <div className="flex-1 overflow-hidden">
-        {activeView === 'artifacts' && <ArtifactViewer meetingId={meetingId} />}
-        {activeView === 'insights' && <AIInsights meetingId={meetingId} />}
-        {activeView === 'timeline' && <Timeline meetingId={meetingId} />}
+      <div className="flex-1 overflow-hidden flex">
+        <div className="flex-1">
+          {activePanel === 'artifacts' && <ArtifactTabs meetingId={meetingId} />}
+          {activePanel === 'terminal' && <OLEDTerminal meetingId={meetingId} />}
+        </div>
       </div>
     </div>
   );

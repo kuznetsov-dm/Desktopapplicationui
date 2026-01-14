@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, FileText, Sparkles, Download, Share2, Settings, Zap } from 'lucide-react';
+import { Search, Terminal, Zap } from 'lucide-react';
 
 interface CommandPaletteProps {
   onClose: () => void;
@@ -10,119 +10,68 @@ export function CommandPalette({ onClose, onSelectMeeting }: CommandPaletteProps
   const [query, setQuery] = useState('');
 
   const commands = [
-    { id: 'new', icon: FileText, label: 'New Meeting', action: 'Create new meeting', shortcut: '⌘N' },
-    { id: 'export', icon: Download, label: 'Export Current', action: 'Export to PDF/MD', shortcut: '⌘E' },
-    { id: 'share', icon: Share2, label: 'Share Meeting', action: 'Generate share link', shortcut: '⌘S' },
-    { id: 'insights', icon: Sparkles, label: 'AI Insights', action: 'Show AI analysis', shortcut: '⌘I' },
-    { id: 'settings', icon: Settings, label: 'Settings', action: 'Open settings', shortcut: '⌘,' },
+    { id: 'new', label: 'NEW_MEETING', action: 'Create new meeting record' },
+    { id: 'export', label: 'EXPORT_CURRENT', action: 'Export to PDF/MD format' },
+    { id: 'terminal', label: 'OPEN_TERMINAL', action: 'Show terminal output' },
+    { id: 'analyze', label: 'REANALYZE', action: 'Run AI analysis again' },
   ];
-
-  const meetings = [
-    { id: '1', title: 'Product Strategy Q1 2026', date: 'Today' },
-    { id: '2', title: 'Engineering Team Sync', date: 'Yesterday' },
-    { id: '3', title: 'Design Review Session', date: 'Jan 10' },
-  ];
-
-  const filteredCommands = commands.filter(cmd =>
-    cmd.label.toLowerCase().includes(query.toLowerCase())
-  );
-
-  const filteredMeetings = meetings.filter(m =>
-    m.title.toLowerCase().includes(query.toLowerCase())
-  );
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start justify-center pt-32"
+      className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-start justify-center pt-32"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl bg-gray-900/95 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl overflow-hidden"
+        className="w-full max-w-2xl bg-black/95 border-2 border-cyan-500/50 rounded-lg shadow-2xl shadow-cyan-500/20 overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Header */}
+        <div className="border-b border-cyan-500/30 bg-cyan-950/20 px-4 py-2">
+          <div className="flex items-center gap-2">
+            <Terminal className="size-4 text-cyan-400" />
+            <span className="text-cyan-400 font-mono text-xs font-bold tracking-wider">
+              COMMAND INTERFACE
+            </span>
+          </div>
+        </div>
+
         {/* Search Input */}
-        <div className="p-4 border-b border-white/10">
+        <div className="p-4 border-b border-cyan-500/30">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-cyan-400/60" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Type a command or search meetings..."
+              placeholder="TYPE COMMAND..."
               autoFocus
-              className="w-full pl-12 pr-4 py-3 bg-transparent text-white placeholder-gray-500 focus:outline-none text-lg"
+              className="w-full pl-12 pr-4 py-3 bg-cyan-950/30 border border-cyan-500/30 rounded text-cyan-400 placeholder-cyan-400/40 focus:outline-none focus:border-cyan-400 font-mono text-lg"
             />
           </div>
         </div>
 
         {/* Results */}
         <div className="max-h-96 overflow-auto">
-          {filteredCommands.length > 0 && (
-            <div className="p-2">
-              <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase">Commands</div>
-              {filteredCommands.map((cmd) => {
-                const Icon = cmd.icon;
-                return (
-                  <button
-                    key={cmd.id}
-                    className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white/10 transition-colors text-left group"
-                  >
-                    <div className="p-2 rounded-lg bg-white/5 group-hover:bg-white/10">
-                      <Icon className="size-4 text-gray-400 group-hover:text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-white font-medium">{cmd.label}</div>
-                      <div className="text-xs text-gray-400">{cmd.action}</div>
-                    </div>
-                    <div className="text-xs text-gray-500 font-mono">{cmd.shortcut}</div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-
-          {filteredMeetings.length > 0 && (
-            <div className="p-2 border-t border-white/10">
-              <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase">Recent Meetings</div>
-              {filteredMeetings.map((meeting) => (
-                <button
-                  key={meeting.id}
-                  onClick={() => {
-                    onSelectMeeting(meeting.id);
-                    onClose();
-                  }}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-white/10 transition-colors text-left"
-                >
-                  <FileText className="size-4 text-gray-400" />
-                  <div className="flex-1">
-                    <div className="text-white font-medium">{meeting.title}</div>
-                    <div className="text-xs text-gray-400">{meeting.date}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {query && filteredCommands.length === 0 && filteredMeetings.length === 0 && (
-            <div className="p-8 text-center text-gray-500">
-              No results found for "{query}"
-            </div>
-          )}
+          <div className="p-2">
+            {commands.map((cmd) => (
+              <button
+                key={cmd.id}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded hover:bg-cyan-500/20 transition-colors text-left group border border-transparent hover:border-cyan-500/30"
+              >
+                <Zap className="size-4 text-cyan-400" />
+                <div className="flex-1">
+                  <div className="text-cyan-400 font-mono font-bold text-sm">{cmd.label}</div>
+                  <div className="text-cyan-400/60 font-mono text-xs">{cmd.action}</div>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-3 bg-white/5 border-t border-white/10 flex items-center justify-between text-xs text-gray-400">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1">
-              <kbd className="px-2 py-1 bg-white/10 rounded">↑↓</kbd> Navigate
-            </span>
-            <span className="flex items-center gap-1">
-              <kbd className="px-2 py-1 bg-white/10 rounded">⏎</kbd> Select
-            </span>
-          </div>
-          <span className="flex items-center gap-1">
-            <kbd className="px-2 py-1 bg-white/10 rounded">ESC</kbd> Close
-          </span>
+        <div className="px-4 py-3 bg-cyan-950/20 border-t border-cyan-500/30 flex items-center justify-between font-mono text-xs text-cyan-400/60">
+          <span>ESC TO CLOSE</span>
+          <span>ENTER TO EXECUTE</span>
         </div>
       </div>
     </div>
