@@ -7,7 +7,7 @@ import { LLMConfig } from './pipeline/LLMConfig';
 import { HistoryPanel } from './pipeline/HistoryPanel';
 import { ArtifactsPanel } from './pipeline/ArtifactsPanel';
 import { LogsPanel } from './pipeline/LogsPanel';
-import { Play } from 'lucide-react';
+import { Play, Sparkles } from 'lucide-react';
 
 export function PipelineTab() {
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
@@ -34,14 +34,23 @@ export function PipelineTab() {
             onFilesChange={setSelectedFiles}
           />
 
-          {/* Run Pipeline Button */}
+          {/* Run Pipeline Button with Gradient */}
           <button
             onClick={handleRunPipeline}
             disabled={selectedFiles.length === 0 || isProcessing}
-            className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm"
+            className="w-full py-3 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 disabled:from-gray-300 disabled:via-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-all shadow-lg shadow-purple-500/30 disabled:shadow-none"
           >
-            <Play className="size-4" />
-            {isProcessing ? 'Processing...' : 'Run Pipeline'}
+            {isProcessing ? (
+              <>
+                <Sparkles className="size-4 animate-pulse" />
+                Processing...
+              </>
+            ) : (
+              <>
+                <Play className="size-4" />
+                Run Pipeline
+              </>
+            )}
           </button>
 
           {/* Stage Status */}

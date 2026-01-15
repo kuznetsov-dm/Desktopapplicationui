@@ -1,4 +1,4 @@
-import { Package, CheckCircle2, Download, Trash2 } from 'lucide-react';
+import { Package, CheckCircle2, Download, Trash2, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 
 interface Plugin {
@@ -8,6 +8,7 @@ interface Plugin {
   stage: string;
   installed: boolean;
   enabled: boolean;
+  featured?: boolean;
 }
 
 export function PluginsTab() {
@@ -19,6 +20,7 @@ export function PluginsTab() {
       stage: 'Transcription',
       installed: true,
       enabled: true,
+      featured: true,
     },
     {
       id: 'whisper-fake',
@@ -43,6 +45,7 @@ export function PluginsTab() {
       stage: 'LLM',
       installed: true,
       enabled: true,
+      featured: true,
     },
     {
       id: 'ollama',
@@ -83,10 +86,12 @@ export function PluginsTab() {
   };
 
   return (
-    <div className="h-full overflow-auto bg-gray-50 p-6">
+    <div className="h-full overflow-auto bg-gradient-to-br from-gray-50 to-gray-100 p-6">
       <div className="max-w-6xl mx-auto">
         <div className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-1">Plugin Management</h2>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-1">
+            Plugin Management
+          </h2>
           <p className="text-sm text-gray-600">
             Install and configure plugins to extend functionality
           </p>
@@ -96,11 +101,33 @@ export function PluginsTab() {
           {plugins.map((plugin) => (
             <div
               key={plugin.id}
-              className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+              className={`bg-white rounded-lg p-4 hover:shadow-lg transition-all relative ${
+                plugin.featured
+                  ? 'border-2 border-transparent bg-gradient-to-br from-white via-white to-purple-50'
+                  : 'border border-gray-200'
+              }`}
+              style={plugin.featured ? {
+                backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #3B82F6, #8B5CF6, #EC4899)',
+                backgroundOrigin: 'border-box',
+                backgroundClip: 'padding-box, border-box',
+              } : {}}
             >
+              {plugin.featured && (
+                <div className="absolute -top-2 -right-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-lg flex items-center gap-1">
+                  <Sparkles className="size-3" />
+                  Featured
+                </div>
+              )}
+
               <div className="flex items-start gap-3 mb-3">
-                <div className="p-2 bg-blue-50 rounded-lg">
-                  <Package className="size-5 text-blue-600" />
+                <div className={`p-2 rounded-lg ${
+                  plugin.featured
+                    ? 'bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500'
+                    : 'bg-blue-50'
+                }`}>
+                  <Package className={`size-5 ${
+                    plugin.featured ? 'text-white' : 'text-blue-600'
+                  }`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-gray-900 text-sm mb-1">
@@ -136,7 +163,7 @@ export function PluginsTab() {
                       type="checkbox"
                       checked={plugin.enabled}
                       onChange={() => handleToggleEnabled(plugin.id)}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
                     />
                     <span className="text-sm text-gray-700">Enabled</span>
                   </label>
@@ -145,9 +172,11 @@ export function PluginsTab() {
                 {/* Install/Remove Button */}
                 <button
                   onClick={() => handleInstallToggle(plugin.id)}
-                  className={`w-full py-2 rounded text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
+                  className={`w-full py-2 rounded text-sm font-medium flex items-center justify-center gap-2 transition-all ${
                     plugin.installed
                       ? 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                      : plugin.featured
+                      ? 'bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30 hover:shadow-purple-500/50'
                       : 'bg-blue-600 text-white hover:bg-blue-700'
                   }`}
                 >
